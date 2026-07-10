@@ -5,7 +5,7 @@ const Chambre = require('./models/Chambre');
 const Service = require('./models/Service');
 
 const seed = async () => {
-  await mongoose.connect(process.env.MONGO_URI);
+  await mongoose.connect('mongodb://localhost:27017/hotel');
   console.log('🌱 Seeding database...');
 
   await User.deleteMany({});

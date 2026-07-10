@@ -160,3 +160,20 @@ hotel-api/
 | Voir ses factures | ✅ | ✅ (toutes) |
 | Enregistrer paiement | ❌ | ✅ |
 | Évaluer un séjour | ✅ | ❌ |
+
+---
+
+## ➕ Créer un compte depuis la ligne de commande
+
+Un petit utilitaire `create_user.js` permet de créer un utilisateur sans lancer le frontend :
+
+```bash
+# Création d'un admin
+npm run create-user -- --email admin2@hotel.com --password admin123 --role admin --nom Admin --prenom Hotel
+
+# Création d'un client
+npm run create-user -- --email user1@hotel.com --password userpass --role client --nom Dupont --prenom Jean
+```
+
+Le script lit `MONGO_URI` depuis `.env` si présent, ou utilise `mongodb://localhost:27017/hotel` par défaut.
+
