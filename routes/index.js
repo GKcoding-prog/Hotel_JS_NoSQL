@@ -48,6 +48,7 @@ router.get('/factures/stats', proteger, adminSeulement, facture.statsFactures);
 router.get('/factures', proteger, facture.listerFactures);
 router.get('/factures/:id', proteger, facture.obtenirFacture);
 router.put('/factures/:id/payer', proteger, adminSeulement, facture.payerFacture);
+router.post('/factures/:id/payer-carte', proteger, adminSeulement, facture.payerFactureCarte); // SOAP gateway
 
 // ─── CLIENTS (Admin) ─────────────────────────────────────────
 router.get('/clients', proteger, adminSeulement, client.listerClients);

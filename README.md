@@ -99,10 +99,27 @@ Authorization: Bearer <token>
 | `/api/factures` | GET | Client/Admin | Lister les factures |
 | `/api/factures/stats` | GET | Admin | Statistiques revenus |
 | `/api/factures/:id` | GET | Client/Admin | Détail facture |
-| `/api/factures/:id/payer` | PUT | Admin | Enregistrer le paiement |
+| `/api/factures/:id/payer` | PUT | Admin | Enregistrer un paiement manuel (espèces, virement) |
+| `/api/factures/:id/payer-carte` | POST | Admin | Payer par carte via la passerelle bancaire SOAP — corps `{ "cardToken": "..." }` |
 
 > Les factures sont **générées automatiquement** lors du checkout.
 > Elles incluent la TVA (18%) et le numéro auto-incrémenté `FACT-YYYY-XXXX`.
+> Une fois la facture payée, la réservation passe au statut `cloturee`.
+
+### 💳 Paiement par carte (passerelle SOAP)
+
+Le paiement par carte est délégué à la passerelle bancaire legacy (Spring Boot / SOAP) du dépôt
+[Soap_Exam](https://github.com/GKcoding-prog/Soap_Exam), qui doit tourner sur le port 8080.
+Si le paiement est accepté, la facture enregistre le `transactionId`, le code d'autorisation et le reçu XML.
+
+| Réponse | Signification |
+|---------|---------------|
+| 200 | Paiement accepté — facture `payee`, réservation `cloturee` |
+| 402 | Carte refusée (`cardToken` = `DECLINED`) — tentative enregistrée |
+| 422 | `<soap:Fault>` de la passerelle (devise non supportée, montant trop élevé…) |
+| 503 / 504 | Passerelle arrêtée ou trop lente — facture inchangée |
+
+Variables `.env` : `PAYMENT_GATEWAY_WSDL_URL`, `PAYMENT_GATEWAY_TIMEOUT_MS`, `PAYMENT_CURRENCY` (voir `.env.example`).
 
 ---
 

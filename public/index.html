@@ -117,7 +117,7 @@
           <div class="stats-grid" id="stats-grid">
             <div class="stat-card"><div class="stat-icon blue">🛏️</div><div><div class="stat-value" id="stat-chambres">—</div><div class="stat-label">Chambres disponibles</div></div></div>
             <div class="stat-card"><div class="stat-icon gold">📅</div><div><div class="stat-value" id="stat-reservations">—</div><div class="stat-label">Réservations actives</div></div></div>
-            <div class="stat-card admin-only" style="display:none"><div class="stat-icon green">💰</div><div><div class="stat-value" id="stat-revenus">—</div><div class="stat-label">Revenus (FCFA)</div></div></div>
+            <div class="stat-card admin-only" style="display:none"><div class="stat-icon green">💰</div><div><div class="stat-value" id="stat-revenus">—</div><div class="stat-label">Revenus (BIF)</div></div></div>
             <div class="stat-card admin-only" style="display:none"><div class="stat-icon red">👥</div><div><div class="stat-value" id="stat-clients">—</div><div class="stat-label">Clients enregistrés</div></div></div>
           </div>
 
@@ -168,6 +168,7 @@
                 <option value="confirmee">Confirmée</option>
                 <option value="en_cours">En cours</option>
                 <option value="terminee">Terminée</option>
+                <option value="cloturee">Clôturée</option>
                 <option value="annulee">Annulée</option>
               </select>
             </div>
@@ -204,7 +205,7 @@
             </div>
             <div class="table-wrapper">
               <table>
-                <thead><tr><th>Nom</th><th>Catégorie</th><th>Prix (FCFA)</th><th>Disponible</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Nom</th><th>Catégorie</th><th>Prix (BIF)</th><th>Disponible</th><th>Actions</th></tr></thead>
                 <tbody id="services-admin-tbody"></tbody>
               </table>
             </div>
@@ -246,7 +247,7 @@
             <div class="card-title" style="margin-bottom:16px">🧾 Mes factures</div>
             <div class="table-wrapper">
               <table>
-                <thead><tr><th>Numéro</th><th>Date</th><th>Total (FCFA)</th><th>Statut</th></tr></thead>
+                <thead><tr><th>Numéro</th><th>Date</th><th>Total (BIF)</th><th>Statut</th></tr></thead>
                 <tbody id="mes-factures-tbody"></tbody>
               </table>
             </div>
@@ -286,7 +287,7 @@
           <option value="familiale">Familiale</option>
         </select>
       </div>
-      <div class="form-group"><label>Prix / nuit (FCFA)</label><input id="c-prix" type="number" placeholder="50000" /></div>
+      <div class="form-group"><label>Prix / nuit (BIF)</label><input id="c-prix" type="number" placeholder="50000" /></div>
       <div class="form-group"><label>Capacité</label><input id="c-capacite" type="number" min="1" placeholder="2" /></div>
       <div class="form-group"><label>Étage</label><input id="c-etage" type="number" min="1" placeholder="1" /></div>
     </div>
@@ -315,7 +316,7 @@
     </div>
     <div class="form-group mt-1"><label>Notes</label><textarea id="res-notes" placeholder="Demandes spéciales..."></textarea></div>
     <div id="res-price-preview" style="background:var(--bg);padding:12px;border-radius:8px;margin-top:14px;display:none">
-      <strong>Estimation :</strong> <span id="res-price-total"></span> FCFA
+      <strong>Estimation :</strong> <span id="res-price-total"></span> BIF
     </div>
     <div class="flex gap-2 mt-3" style="justify-content:flex-end">
       <button class="btn btn-outline" onclick="closeModal('modal-reservation')">Annuler</button>
@@ -342,7 +343,7 @@
           <option value="autre">Autre</option>
         </select>
       </div>
-      <div class="form-group"><label>Prix (FCFA)</label><input id="s-prix" type="number" /></div>
+      <div class="form-group"><label>Prix (BIF)</label><input id="s-prix" type="number" /></div>
     </div>
     <div class="form-group mt-1"><label>Description</label><textarea id="s-description"></textarea></div>
     <div class="flex gap-2 mt-3" style="justify-content:flex-end">

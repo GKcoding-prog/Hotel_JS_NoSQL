@@ -25,7 +25,11 @@ async function api(method, path, body = null) {
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(API + path, opts);
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Erreur serveur');
+  if (!res.ok) {
+    const err = new Error(data.message || 'Erreur serveur');
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
@@ -43,6 +47,7 @@ function statusBadge(s) {
     confirmee:   ['badge-blue', 'Confirmée'],
     en_cours:    ['badge-green', 'En cours'],
     terminee:    ['badge-gray', 'Terminée'],
+    cloturee:    ['badge-green', 'Clôturée'],
     annulee:     ['badge-red', 'Annulée'],
     en_attente:  ['badge-yellow', 'En attente'],
     payee:       ['badge-green', 'Payée'],
@@ -236,7 +241,7 @@ function renderRooms(rooms, arrivee = null, depart = null) {
         <div class="room-card-title">Chambre ${r.numero}</div>
         <div class="room-card-sub">${r.type.charAt(0).toUpperCase() + r.type.slice(1)} — Étage ${r.etage} — ${r.capacite} pers.</div>
         <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">${(r.equipements || []).join(' · ') || '—'}</div>
-        <div class="room-card-price">${fmt(r.prixParNuit)} <span>FCFA / nuit</span></div>
+        <div class="room-card-price">${fmt(r.prixParNuit)} <span>BIF / nuit</span></div>
       </div>
       <div class="room-card-footer">
         ${r.disponible
@@ -279,7 +284,7 @@ async function deleteChambre(id) {
 ───────────────────────────────────────── */
 function openReservationModal(id, numero, type, prix, arrivee = '', depart = '') {
   $('res-chambre-id').value = id;
-  $('modal-res-room').textContent = `Chambre ${numero} — ${type} — ${fmt(prix)} FCFA/nuit`;
+  $('modal-res-room').textContent = `Chambre ${numero} — ${type} — ${fmt(prix)} BIF/nuit`;
   if (arrivee) $('res-arrivee').value = arrivee;
   if (depart) $('res-depart').value = depart;
   // Attach price preview
@@ -327,7 +332,7 @@ async function loadReservations() {
         <td>Chambre ${r.chambre?.numero || '—'}</td>
         <td>${fmtDate(r.dateArrivee)}</td>
         <td>${fmtDate(r.dateDepart)}</td>
-        <td><strong>${fmt(r.prixTotal)}</strong> FCFA</td>
+        <td><strong>${fmt(r.prixTotal)}</strong> BIF</td>
         <td>${statusBadge(r.statut)}</td>
         <td>
           ${isAdmin && r.statut === 'confirmee' ? `<button class="btn btn-success btn-sm" onclick="checkin('${r._id}')">Check-in</button>` : ''}
@@ -335,7 +340,7 @@ async function loadReservations() {
             <button class="btn btn-primary btn-sm" onclick="openAddService('${r._id}')">+ Service</button>
             <button class="btn btn-accent btn-sm" onclick="checkout('${r._id}')">Check-out</button>` : ''}
           ${!isAdmin && r.statut === 'en_cours' ? `<button class="btn btn-outline btn-sm" onclick="openAddService('${r._id}')">+ Service</button>` : ''}
-          ${r.statut === 'terminee' && !r.evaluation?.note ? `<button class="btn btn-outline btn-sm" onclick="openEval('${r._id}')">⭐ Évaluer</button>` : ''}
+          ${['terminee','cloturee'].includes(r.statut) && !r.evaluation?.note ? `<button class="btn btn-outline btn-sm" onclick="openEval('${r._id}')">⭐ Évaluer</button>` : ''}
           ${r.evaluation?.note ? `<span class="stars">${'⭐'.repeat(r.evaluation.note)}</span>` : ''}
           ${['en_attente','confirmee'].includes(r.statut) ? `<button class="btn btn-danger btn-sm" onclick="annuler('${r._id}')">Annuler</button>` : ''}
         </td>
@@ -405,7 +410,7 @@ async function loadServicesClient() {
       <tr>
         <td>${s.nom}</td>
         <td><span class="badge badge-blue">${s.categorie}</span></td>
-        <td><strong>${fmt(s.prix)}</strong> FCFA</td>
+        <td><strong>${fmt(s.prix)}</strong> BIF</td>
         <td>${s.description || '—'}</td>
       </tr>`).join('');
   } catch (e) { toast(e.message, 'error'); }
@@ -447,7 +452,7 @@ function openAddService(resId) {
   // Populate dropdown
   $('add-service-id').innerHTML = allServices
     .filter(s => s.disponible)
-    .map(s => `<option value="${s._id}">${s.nom} — ${fmt(s.prix)} FCFA</option>`)
+    .map(s => `<option value="${s._id}">${s.nom} — ${fmt(s.prix)} BIF</option>`)
     .join('');
   openModal('modal-add-service');
 }
@@ -533,14 +538,14 @@ async function loadFactures() {
       api('GET', '/factures'),
       api('GET', '/factures/stats'),
     ]);
-    $('revenue-total').textContent = `Total encaissé : ${fmt(statsRes.data.revenuTotal)} FCFA`;
+    $('revenue-total').textContent = `Total encaissé : ${fmt(statsRes.data.revenuTotal)} BIF`;
     $('factures-tbody').innerHTML = factRes.data.map(f => `
       <tr>
         <td><strong>${f.numero || '—'}</strong></td>
         <td>${f.client?.prenom || ''} ${f.client?.nom || ''}</td>
-        <td>${fmt(f.sousTotal)} FCFA</td>
-        <td>${fmt(f.montantTVA)} FCFA</td>
-        <td><strong>${fmt(f.montantTotal)} FCFA</strong></td>
+        <td>${fmt(f.sousTotal)} BIF</td>
+        <td>${fmt(f.montantTVA)} BIF</td>
+        <td><strong>${fmt(f.montantTotal)} BIF</strong></td>
         <td>${statusBadge(f.statut)}</td>
         <td>
           ${f.statut !== 'payee' ? `<button class="btn btn-success btn-sm" onclick="payerFacture('${f._id}')">💳 Payer</button>` : '<span class="text-muted">—</span>'}
@@ -550,8 +555,22 @@ async function loadFactures() {
 }
 
 async function payerFacture(id) {
-  const methode = prompt('Méthode de paiement :\n1 = especes\n2 = carte\n3 = virement', '1');
-  const map = { '1': 'especes', '2': 'carte', '3': 'virement' };
+  const methode = prompt('Méthode de paiement :\n1 = carte (passerelle bancaire SOAP)\n2 = especes\n3 = virement', '1');
+  if (methode === null) return;
+
+  if (methode === '1') {
+    const cardToken = prompt('Token de carte (simulé) :\n- n\'importe quelle valeur = paiement accepté\n- DECLINED = carte refusée', 'tok_visa_4242');
+    if (!cardToken) return;
+    try {
+      const res = await api('POST', `/factures/${id}/payer-carte`, { cardToken });
+      const p = res.data.paiement;
+      toast(`Paiement accepté 💳 — ${p.transactionId} (${p.authorizationCode})`);
+    } catch (e) { toast(e.message, e.status === 402 ? 'warning' : 'error'); }
+    loadFactures();
+    return;
+  }
+
+  const map = { '2': 'especes', '3': 'virement' };
   try {
     await api('PUT', `/factures/${id}/payer`, { methodePaiement: map[methode] || 'especes' });
     toast('Paiement enregistré 💰');
@@ -566,7 +585,7 @@ async function loadMesFactures() {
       <tr>
         <td><strong>${f.numero || '—'}</strong></td>
         <td>${fmtDate(f.createdAt)}</td>
-        <td><strong>${fmt(f.montantTotal)}</strong> FCFA</td>
+        <td><strong>${fmt(f.montantTotal)}</strong> BIF</td>
         <td>${statusBadge(f.statut)}</td>
       </tr>`).join('') || `<tr><td colspan="4" class="text-muted" style="text-align:center;padding:20px">Aucune facture</td></tr>`;
   } catch (e) { toast(e.message, 'error'); }

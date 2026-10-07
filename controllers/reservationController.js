@@ -166,7 +166,7 @@ exports.checkout = async (req, res) => {
       destinataire: reservation.client,
       type: 'facture_generee',
       titre: 'Facture disponible',
-      message: `Votre facture ${facture.numero} d'un montant de ${facture.montantTotal.toLocaleString('fr-FR')} FCFA est disponible.`,
+      message: `Votre facture ${facture.numero} d'un montant de ${facture.montantTotal.toLocaleString('fr-FR')} BIF est disponible.`,
       lien: `/factures/${facture._id}`,
     });
 
@@ -217,7 +217,7 @@ exports.evaluerSejour = async (req, res) => {
 
     const reservation = await Reservation.findById(req.params.id);
     if (!reservation) return res.status(404).json({ succes: false, message: 'Réservation introuvable.' });
-    if (reservation.statut !== 'terminee') {
+    if (!['terminee', 'cloturee'].includes(reservation.statut)) {
       return res.status(400).json({ succes: false, message: 'Le séjour doit être terminé pour être évalué.' });
     }
     if (reservation.client.toString() !== req.user._id.toString()) {

@@ -22,7 +22,7 @@ const reservationSchema = new mongoose.Schema({
   nombrePersonnes: { type: Number, required: true, min: 1 },
   statut: {
     type: String,
-    enum: ['en_attente', 'confirmee', 'en_cours', 'terminee', 'annulee'],
+    enum: ['en_attente', 'confirmee', 'en_cours', 'terminee', 'cloturee', 'annulee'],
     default: 'en_attente',
   },
   servicesConsommes: [consommationServiceSchema],
