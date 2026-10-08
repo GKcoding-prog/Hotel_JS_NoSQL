@@ -548,34 +548,47 @@ async function loadFactures() {
         <td><strong>${fmt(f.montantTotal)} BIF</strong></td>
         <td>${statusBadge(f.statut)}</td>
         <td>
-          ${f.statut !== 'payee' ? `<button class="btn btn-success btn-sm" onclick="payerFacture('${f._id}')">💳 Payer</button>` : '<span class="text-muted">—</span>'}
+          ${f.statut !== 'payee' ? `<button class="btn btn-success btn-sm" onclick="payerFacture('${f._id}','${f.numero}',${f.montantTotal})">💳 Payer</button>` : '<span class="text-muted">—</span>'}
         </td>
       </tr>`).join('');
   } catch (e) { toast(e.message, 'error'); }
 }
 
-async function payerFacture(id) {
-  const methode = prompt('Méthode de paiement :\n1 = carte (passerelle bancaire SOAP)\n2 = especes\n3 = virement', '1');
-  if (methode === null) return;
+function payerFacture(id, numero, montant) {
+  $('pay-facture-id').value = id;
+  $('pay-facture-info').textContent = `Facture ${numero} — ${fmt(montant)} BIF`;
+  $('pay-methode').value = 'carte';
+  togglePayCard();
+  openModal('modal-paiement');
+}
 
-  if (methode === '1') {
-    const cardToken = prompt('Token de carte (simulé) :\n- n\'importe quelle valeur = paiement accepté\n- DECLINED = carte refusée', 'tok_visa_4242');
-    if (!cardToken) return;
-    try {
+function togglePayCard() {
+  $('pay-card-group').style.display = $('pay-methode').value === 'carte' ? '' : 'none';
+}
+
+async function submitPaiement() {
+  const id = $('pay-facture-id').value;
+  const methode = $('pay-methode').value;
+  const btn = $('pay-submit');
+  btn.disabled = true;
+  try {
+    if (methode === 'carte') {
+      const cardToken = $('pay-card-token').value.trim();
+      if (!cardToken) return toast('Saisissez un token de carte.', 'warning');
       const res = await api('POST', `/factures/${id}/payer-carte`, { cardToken });
       const p = res.data.paiement;
       toast(`Paiement accepté 💳 — ${p.transactionId} (${p.authorizationCode})`);
-    } catch (e) { toast(e.message, e.status === 402 ? 'warning' : 'error'); }
+    } else {
+      await api('PUT', `/factures/${id}/payer`, { methodePaiement: methode });
+      toast('Paiement enregistré 💰');
+    }
+    closeModal('modal-paiement');
+  } catch (e) {
+    toast(e.message, e.status === 402 ? 'warning' : 'error');
+  } finally {
+    btn.disabled = false;
     loadFactures();
-    return;
   }
-
-  const map = { '2': 'especes', '3': 'virement' };
-  try {
-    await api('PUT', `/factures/${id}/payer`, { methodePaiement: map[methode] || 'especes' });
-    toast('Paiement enregistré 💰');
-    loadFactures();
-  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function loadMesFactures() {

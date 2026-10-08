@@ -399,6 +399,34 @@
   </div>
 </div>
 
+<!-- Pay Invoice -->
+<div class="modal-overlay" id="modal-paiement">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">💳 Payer la facture</span>
+      <button class="modal-close" onclick="closeModal('modal-paiement')">✕</button>
+    </div>
+    <input type="hidden" id="pay-facture-id" />
+    <p id="pay-facture-info" class="text-muted" style="margin-bottom:14px"></p>
+    <div class="form-group"><label>Méthode de paiement</label>
+      <select id="pay-methode" onchange="togglePayCard()">
+        <option value="carte">Carte bancaire (passerelle SOAP)</option>
+        <option value="especes">Espèces</option>
+        <option value="virement">Virement</option>
+      </select>
+    </div>
+    <div class="form-group mt-1" id="pay-card-group">
+      <label>Token de carte (simulé)</label>
+      <input id="pay-card-token" value="tok_visa_4242" />
+      <span class="text-muted" style="font-size:.75rem">Toute valeur = paiement accepté · <strong>DECLINED</strong> = carte refusée</span>
+    </div>
+    <div class="flex gap-2 mt-3" style="justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal('modal-paiement')">Annuler</button>
+      <button class="btn btn-success" id="pay-submit" onclick="submitPaiement()">Payer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
 
